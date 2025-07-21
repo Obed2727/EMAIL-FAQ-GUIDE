@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROUXops Email Response Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .search-bar {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 600px;
+        }
+        
+        .sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        
+        .category {
+            margin-bottom: 20px;
+        }
+        
+        .category-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        
+        .category-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .category-items {
+            display: none;
+            padding-left: 15px;
+        }
+        
+        .category.active .category-items {
+            display: block;
+        }
+        
+        .category-item {
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .category-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .category-item.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        
+        .response-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .response-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .response-content {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            border: 1px solid #e9ecef;
+            position: relative;
+        }
+        
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-button:hover {
+            background: #5a6fd8;
+            transform: scale(1.05);
+        }
+        
+        .copy-button.copied {
+            background: #28a745;
+        }
+        
+        .welcome-message {
+            text-align: center;
+            color: #6c757d;
+            font-size: 1.2em;
+            margin-top: 100px;
+        }
+        
+        .no-results {
+            text-align: center;
+            color: #6c757d;
+            font-size: 1.1em;
+            margin-top: 50px;
+        }
+        
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ROUXops Email Response Dashboard</h1>
+            <p>Quick access to standardized email responses for campus operations</p>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search for email responses, keywords, or scenarios...">
+        </div>
+        
+        <div class="main-content">
+            <div class="sidebar" id="sidebar">
+                <div class="category" data-category="student-services">
+                    <div class="category-header">👨‍🎓 Student Services</div>
+                    <div class="category-items">
+                        <div class="category-item" data-response="husky-card-new">New Husky Card Request</div>
+                        <div class="category-item" data-response="husky-card-pickup">Card Pickup Request</div>
+                        <div class="category-item" data-response="husky-card-access">Access Problems</div>
+                        <div class="category-item" data-response="husky-card-lost">Lost/Damaged Card</div>
+                        <div class="category-item" data-response="alumni-card">Alumni Card Services</div>
+                        <div class="category-item" data-response="bus-pass">Bus Pass Issues</div>
+                        <div class="category-item" data-response="coop-jobs">Co-op & Employment</div>
+                        <div class="category-item" data-response="financial-services">Financial Services</div>
+                        <div class="category-item" data-response="academic-advising">Academic Advising</div>
+                    </div>
+                </div>
+                
+                <div class="category" data-category="faculty-staff">
+                    <div class="category-header">👩‍🏫 Faculty & Staff</div>
+                    <div class="category-items">
+                        <div class="category-item" data-response="office-space">Office & Desk Space</div>
+                        <div class="category-item" data-response="av-tech">Audio/Visual & Technology</div>
+                        <div class="category-item" data-response="event-support">Event & Catering Support</div>
+                        <div class="category-item" data-response="campus-hours">Campus Hours</div>
+                        <div class="category-item" data-response="contact-info">Contact Information</div>
+                    </div>
+                </div>
+                
+                <div class="category" data-category="facilities">
+                    <div class="category-header">🏢 Facilities & Services</div>
+                    <div class="category-items">
+                        <div class="category-item" data-response="parking">Parking & Transportation</div>
+                        <div class="category-item" data-response="mail-packages">Mail & Packages</div>
+                        <div class="category-item" data-response="lost-found">Lost & Found</div>
+                        <div class="category-item" data-response="wifi-internet">Wi-Fi & Internet</div>
+                        <div class="category-item" data-response="maintenance">Facilities & Maintenance</div>
+                        <div class="category-item" data-response="printing">Printing Services</div>
+                        <div class="category-item" data-response="lockers">Locker Management</div>
+                    </div>
+                </div>
+                
+                <div class="category" data-category="emergency">
+                    <div class="category-header">🚨 Emergency & Safety</div>
+                    <div class="category-items">
+                        <div class="category-item" data-response="safety-concerns">Safety Concerns</div>
+                        <div class="category-item" data-response="medical-emergency">Medical Emergency</div>
+                        <div class="category-item" data-response="security-issues">Security Issues</div>
+                        <div class="category-item" data-response="equipment-malfunction">Equipment Malfunctions</div>
+                    </div>
+                </div>
+                
+                <div class="category" data-category="wellness">
+                    <div class="category-header">🌟 Campus Resources</div>
+                    <div class="category-items">
+                        <div class="category-item" data-response="health-wellness">Health & Wellness</div>
+                        <div class="category-item" data-response="academic-support">Academic Support</div>
+                        <div class="category-item" data-response="discrimination">Discrimination Reporting</div>
+                        <div class="category-item" data-response="student-orgs">Student Organizations</div>
+                        <div class="category-item" data-response="housing">Housing Support</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-area" id="contentArea">
+                <div class="welcome-message">
+                    <h2>Welcome to the ROUXops Dashboard</h2>
+                    <p>Select a category from the sidebar or use the search bar to find email responses</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Email response templates
+        const responses = {
+            'husky-card-new': {
+                title: 'New Husky Card Request',
+                content: `Hi [Name],
+
+Thank you for reaching out about your Husky Card photo submission. I understand you're looking to get your ID card processed and are wondering about pickup details.
+
+[If photo needs correction: I've reviewed your photo and notice that the background doesn't meet our requirements. For uniformity and clarity, we require a white, clear background for all ID photos. You may either resend a new photo with the correct background or visit the campus front desk to have your photo taken - we're happy to help with either option.]
+
+Your Husky card will be ready for pickup at The Roux Institute front desk anytime within work hours (Monday-Friday 8am-10pm, Saturday & Sunday 9am-5pm).
+
+[If previous cards exist: Please note that any old or missing cards will be nullified once your new one is printed for security purposes.]
+
+**Helpful Resources:**
+• Campus map and front desk location: [link]
+• Husky Card services guide: [link]
+• Building hours and contact information: [link]
+
+I'll follow up with you once your card is printed and ready for pickup. If you have any questions in the meantime, please don't hesitate to reach out.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'husky-card-pickup': {
+                title: 'Husky Card Pickup Request',
+                content: `Hi [Name],
+
+Thank you for checking on your Husky Card status. I'm pleased to let you know that your card is ready for pickup at The Roux Institute front desk.
+
+**Next Steps:**
+• Visit our front desk anytime during operating hours
+• Bring any photo ID for verification if needed
+• For any access issues after pickup, simply reply with the specific door/floor you're having trouble with, and we'll coordinate a fix immediately
+
+**Helpful Resources:**
+• Building hours: Monday-Friday 8am-10pm, Saturday & Sunday 9am-5pm
+• Front desk location: [campus map link]
+• Husky Card troubleshooting guide: [link]
+
+Please let me know once you've picked up your card so I can ensure everything is working properly for you.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'husky-card-access': {
+                title: 'Husky Card Access Problems',
+                content: `Hi [Name],
+
+Thank you for letting me know about the access trouble with your Husky Card. I completely understand how frustrating it must be when your card isn't working, especially when you need to get into the building or specific areas.
+
+**Immediate Solutions:**
+• Please come to the front desk with your card and NUID, and we'll reprogram it immediately
+• If you're currently locked out, look for the QR code and signs with "call security [emergency number]" - someone will come let you in within minutes
+• We can also verify your access permissions while you're here to prevent future issues
+
+**What We'll Check:**
+• Card programming and magnetic stripe
+• Access permissions for your specific areas
+• System updates that might affect functionality
+
+**Helpful Resources:**
+• Campus security contact: [emergency number]
+• Building access guide: [link]
+• Front desk location and hours: [link]
+
+I'll make sure we get this resolved quickly for you. Please call or stop by at your earliest convenience, and I'll personally ensure your access is working properly before you leave.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'husky-card-lost': {
+                title: 'Lost or Damaged Husky Card',
+                content: `Hi [Name],
+
+Thank you for reporting your lost Husky Card. I understand how concerning it must be to lose your campus access and ID, and I want to help you get this resolved quickly.
+
+**What We'll Do:**
+• Issue you a new card with the same access permissions
+• Deactivate your old card immediately for security
+• Complete the replacement process in just a few minutes
+
+**What You'll Need:**
+• Photo ID for verification
+• Visit our front desk with the above
+
+**Security Note:** Your old card has already been deactivated in our system to protect your account and prevent unauthorized access.
+
+**Helpful Resources:**
+• Front desk location and hours: [link]
+• Campus security (for any security concerns): [emergency number]
+• Husky Card services overview: [link]
+
+I'll be here to process your replacement card personally. The entire process takes about 5 minutes, and you'll walk out with full access restored.
+
+Is there a specific time that works best for you to visit the front desk? I'm happy to ensure someone is ready to help you immediately.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'alumni-card': {
+                title: 'Alumni Card Services',
+                content: `Hi [Name],
+
+Thank you for reaching out about obtaining your alumni Husky Card. I understand how important it is to maintain your connection to the Roux community after graduation, and I'm happy to help you get your alumni card processed.
+
+**Application Process:**
+• Complete the alumni card application form: [link]
+• Submit a current photo with white, clear background
+• Provide proof of graduation or current alumni status
+• Processing time: 5-7 business days after complete application
+
+**Photo Requirements:**
+• White, clear background (required for uniformity)
+• Head and shoulders visible
+• Good lighting and clear resolution
+• You may submit digitally or visit campus for photo
+
+**Alumni Card Benefits:**
+• Campus library access
+• Alumni event participation
+• Campus facility usage privileges
+• Connection to alumni network resources
+
+**Pickup Information:**
+• Alumni cards are collected on designated days: Fridays
+• Available at the front desk during business hours
+• Please bring photo ID for verification
+• Cards cannot be mailed but can be held for convenient pickup
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'bus-pass': {
+                title: 'Bus Pass Issues',
+                content: `Hi [Name],
+
+Thank you for reaching out about your bus pass issue. I understand how inconvenient it must be when your transportation isn't working, especially when you're trying to get to campus or around the city.
+
+Let me help you resolve this right away. Could you please provide your NUID and let me know when the issue occurred? If it's a Roux-issued Dirigo pass, I'll check our system immediately to identify the problem.
+
+**Immediate Support:**
+• Call (207.553.3136) for urgent transportation needs
+• Email Roux Operations for ongoing issues
+• We'll verify your pass status and reactivate if needed
+
+**What We'll Check:**
+• Pass activation status in our system
+• Expiration dates and renewal needs
+• Connection with Metro bus system
+
+I'll investigate this issue immediately and follow up within 2 hours with a resolution. If this is an urgent situation affecting your ability to get to class, please call the number above for immediate assistance.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'coop-jobs': {
+                title: 'Co-op and Employment Questions',
+                content: `Hi [Name],
+
+Thank you for reaching out about co-op opportunities. I understand that finding the right co-op position is crucial for your career development, and it can feel overwhelming to know where to start.
+
+Let me connect you with the right resources to get your co-op search on track. For co-op positions and student jobs, I recommend starting with NUworks or Workday, where you can browse current openings that match your program and interests.
+
+**Primary Resources:**
+• NUworks platform for co-op listings
+• Workday for student employment opportunities
+• rouxcareer@northeastern.edu for personalized guidance
+• rouxstudentlife@northeastern.edu for additional support
+
+**Services Available:**
+• Resume review and optimization
+• Interview preparation and practice
+• Job matching based on your skills and interests
+• Career counseling and planning
+
+I'll forward your information to our career services team so they can reach out to you directly with personalized guidance for your program and interests.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'financial-services': {
+                title: 'Financial Services',
+                content: `Hi [Name],
+
+Tuition and billing are handled by Student Financial Services (SFS). You can reach them at studentaccounts@northeastern.edu or visit studenthub.northeastern.edu → Services → Financial Services. They can troubleshoot payment issues and provide alternative payment methods. Let us know if you need help getting in touch.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'academic-advising': {
+                title: 'Academic Advising',
+                content: `Hi [Name],
+
+For program planning or academic advising, we'll connect you with the Enrollment & Advising team at roux-enroll@northeastern.edu. Let us know if you're unsure who your advisor is - they can look up your assigned advisor and help with course planning.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'office-space': {
+                title: 'Office and Desk Space Requests',
+                content: `Hi [Name],
+
+We can help you reserve an office or desk. Please send us the date(s), duration, and any equipment needs (e.g., monitor). We'll confirm availability and prepare the space with guest access credentials.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'av-tech': {
+                title: 'Audio/Visual and Technology Setup',
+                content: `Hi [Name],
+
+Please share your room, class time, and equipment needs (Zoom, projector, mic, etc.). We'll assist or set up the room ahead of time. For hybrid classes, we'll ensure cameras capture both you and any whiteboard work, plus set up audio that works for in-person and remote students.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'event-support': {
+                title: 'Event and Catering Support',
+                content: `Hi [Name],
+
+Please share your event name, date/time, headcount, and setup needs (tables, signage, catering drop-off, etc.). We'll coordinate with Facilities. For multi-day conferences, we'll also arrange registration area setup, break room coordination, A/V support throughout, and cleanup between sessions.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'campus-hours': {
+                title: 'Campus Hours and Holiday Operations',
+                content: `Hi [Name],
+
+**Regular Campus Hours:**
+• Monday - Friday: 8:00 AM - 10:00 PM
+• Saturday & Sunday: 9:00 AM - 5:00 PM
+
+**Holiday Operations:**
+• Campus follows regular weekday hours during most holidays
+• Essential services (security, emergency) available within open hours
+• Major holidays may have special hours - check our website or call ahead
+
+Are you planning a specific visit that I can help you coordinate with our current schedule?
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'contact-info': {
+                title: 'Contact Information Requests',
+                content: `Hi [Name],
+
+Thank you for reaching out about getting in touch with [Staff/Faculty Member's Name]. I understand you need to connect with them, and I want to help facilitate that connection while respecting everyone's privacy and communication preferences.
+
+Before I can share contact information, I need to reach out to [Staff/Faculty Member] to get their permission and preferred method of contact for your inquiry.
+
+**Privacy Protection Process:**
+• I'll contact [Staff/Faculty Member] directly about your request
+• They'll let me know their preferred contact method for your situation
+• I'll follow up with you within 24 hours with appropriate contact information
+• This ensures everyone's communication preferences are respected
+
+Could you share a bit more about the nature of your inquiry? This will help me provide appropriate context when I reach out to them.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'parking': {
+                title: 'Parking and Transportation',
+                content: `Hi [Name],
+
+We have several daily parking options! Stop by the front desk for current daily rates, ParkWhiz discount codes, and information about part-time employee parking packages. We can also show you the most convenient lots for your typical schedule.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'mail-packages': {
+                title: 'Mail and Package Services',
+                content: `Hi [Name],
+
+We'll check for your package. If delivered to 100 Fore, it should be logged at the front desk. Send tracking info if you have it! We'll also check with building security about any deliveries that might have been missed or delivered to alternate locations.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'lost-found': {
+                title: 'Lost and Found',
+                content: `Hi [Name],
+
+Please describe the item, where it was lost, and when. If found, it'll be at the front desk in our Lost & Found drawer. I'll check specifically for [item description] and let you know immediately if we have it. We'll also put out a notice to staff to watch for it.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'wifi-internet': {
+                title: 'Wi-Fi and Internet Support',
+                content: `Hi [Name],
+
+Use NUwave with your Northeastern credentials. Guests should connect to NUwave-Guest. Let us know if issues continue. For immediate help, try: restarting your laptop, forgetting and re-adding the network, or using your phone's hotspot as backup. We'll also contact IT support for you.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'maintenance': {
+                title: 'Facilities and Maintenance',
+                content: `Hi [Name],
+
+Thank you for reporting the broken [item] on [location]! We'll have our facilities team check it out and either repair or replace it as needed. We'll also put up a temporary sign to keep people from using it until it's fixed.
+
+Thanks for helping us keep the campus safe and functional!
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'printing': {
+                title: 'Printing Services',
+                content: `Hi [Name],
+
+For printing issues, please try the following:
+1. Ensure you're logged into the system with your Northeastern credentials
+2. Check that your printing account has sufficient funds/credits
+3. Verify you're connected to the correct network (NUwave)
+
+If these steps don't resolve the issue, contact IT support during business hours or visit the front desk for immediate assistance.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'lockers': {
+                title: 'Locker Assignment and Management',
+                content: `Hi [Name],
+
+Locker assignments are available for students and staff based on availability. To request a locker:
+1. Submit a request through [specific process/portal]
+2. Provide your NUID and intended use
+3. Complete any required agreements for locker use
+
+We'll notify you of availability and provide combination/key information once assigned.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'safety-concerns': {
+                title: 'Safety Concerns and Incidents',
+                content: `Hi [Name],
+
+Thank you for reporting this immediately! Please evacuate that area and keep others away while we investigate. I'm contacting facilities emergency and campus safety right now. We'll have someone there within 5 minutes to test air quality and determine the source. Your quick reporting helps keep everyone safe!
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'medical-emergency': {
+                title: 'Medical Emergency Response',
+                content: `Hi [Name],
+
+Yes, call 911 immediately for any medical emergency! We're also dispatching campus safety and our first aid responders to [location]. Please stay with the person if safe to do so and provide comfort until help arrives. Thank you for acting quickly - you're doing exactly the right thing!
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'security-issues': {
+                title: 'Security Issues',
+                content: `Hi [Name],
+
+Please call campus security immediately at [number] and provide your exact location. Do not confront the person directly. We're sending security personnel to investigate right now. Please keep yourself and others safe while help is on the way. Thank you for reporting this security concern!
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'equipment-malfunction': {
+                title: 'Equipment Malfunctions',
+                content: `Hi [Name],
+
+You did the right thing turning off the equipment! Please keep everyone away from that machine and unplug it if safely possible. We're sending facilities emergency immediately to inspect the electrical issue. Please secure the area until our technicians arrive. Safety first - thank you for quick thinking!
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'health-wellness': {
+                title: 'Health and Wellness Support',
+                content: `Hi [Name],
+
+For immediate medical concerns, please call 911 or visit the nearest emergency room if you need urgent care. For ongoing health needs, insurance questions, or wellness resources, please contact:
+
+- Student Health Services: [contact information]
+- Counseling and Psychological Services: [contact information]  
+- Student Life for wellness resources: rouxstudentlife@northeastern.edu
+
+If this is a medical emergency, please seek immediate help and let us know how we can support you on campus.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'academic-support': {
+                title: 'Academic Support and Navigation',
+                content: `Hi [Name],
+
+I can help you find your classroom! Please let me know your course name/number and I'll provide specific directions to the room location. You can also:
+
+- Check the digital directory at the front desk
+- Use the campus map available at the front desk
+- Ask any staff member wearing a Roux ID badge
+
+For ongoing academic navigation support, contact your academic advisor through roux-enroll@northeastern.edu.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'discrimination': {
+                title: 'Discrimination and Safety Reporting',
+                content: `Hi [Name],
+
+Thank you for bringing this serious matter to our attention. Your safety and wellbeing are our top priority. Please contact:
+
+**Immediate Support:**
+- Campus Safety/Security: [emergency number]
+- Title IX Coordinator: [contact information]
+- Office of University Equity and Compliance: [contact information]
+
+**Additional Resources:**
+- Student Life for support services: rouxstudentlife@northeastern.edu
+- Counseling services if needed: [contact information]
+
+If you feel you are in immediate danger, please call 911.
+
+We take all reports of discrimination and safety concerns seriously.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your signature]
+Roux Operations Team`
+            },
+            'student-orgs': {
+                title: 'Student Organizations and Clubs',
+                content: `Hi [Name],
+
+Thank you for reaching out about starting a new student organization! Creating a new student organization involves several important steps to ensure you get proper recognition, support, and resources.
+
+**Primary Contact for Student Organizations:**
+• Annie and Lauren at Roux Student Life: rouxstudentlife@northeastern.edu
+
+**Typical Process Includes:**
+• Completing organization registration forms
+• Establishing a constitution and bylaws
+• Finding a faculty advisor
+• Meeting minimum membership requirements
+• Understanding funding and event planning procedures
+
+I'll let Annie and Lauren know you're interested in starting a new organization so they can prioritize reaching out to you with detailed next steps.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            },
+            'housing': {
+                title: 'Student Housing Support',
+                content: `Hi [Name],
+
+Thank you for reaching out about housing. All housing-related inquiries, applications, and support are handled by our dedicated Housing specialist.
+
+**Primary Housing Contact:**
+• Deanna Barry, Roux Housing: [housing email] | [direct phone]
+
+**Services Available:**
+• Housing application guidance and deadlines
+• Roommate matching and compatibility assessments
+• Housing policy explanations and support
+• Accommodation requests for special needs
+• Conflict resolution for housing-related issues
+
+I'll let Deanna know you've reached out so she can prioritize getting back to you with personalized assistance.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+[Your name] | [Direct phone] | [Email]
+Roux Operations Team`
+            }
+        };
+
+        // DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const sidebar = document.getElementById('sidebar');
+        const contentArea = document.getElementById('contentArea');
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Category toggle
+            document.querySelectorAll('.category-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const category = this.parentElement;
+                    category.classList.toggle('active');
+                });
+            });
+            
+            // Response item selection
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    const responseId = this.dataset.response;
+                    displayResponse(responseId);
+                });
+            });
+            
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                if (searchTerm === '') {
+                    showWelcomeMessage();
+                    return;
+                }
+                performSearch(searchTerm);
+            });
+        }
+        
+        function displayResponse(responseId) {
+            const response = responses[responseId];
+            if (!response) return;
+            
+            contentArea.innerHTML = `
+                <div class="response-card">
+                    <h2 class="response-title">${response.title}</h2>
+                    <div class="response-content">
+                        <button class="copy-button" onclick="copyToClipboard(this, '${responseId}')">Copy</button>
+                        ${response.content}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function performSearch(searchTerm) {
+            const results = [];
+            
+            // Search through all responses
+            Object.keys(responses).forEach(responseId => {
+                const response = responses[responseId];
+                const title = response.title.toLowerCase();
+                const content = response.content.toLowerCase();
+                
+                if (title.includes(searchTerm) || content.includes(searchTerm)) {
+                    results.push({
+                        id: responseId,
+                        title: response.title,
+                        content: response.content,
+                        relevanceScore: calculateRelevance(searchTerm, title, content)
+                    });
+                }
+            });
+            
+            // Sort by relevance
+            results.sort((a, b) => b.relevanceScore - a.relevanceScore);
+            
+            if (results.length === 0) {
+                contentArea.innerHTML = `
+                    <div class="no-results">
+                        <h2>No results found</h2>
+                        <p>Try different keywords or browse the categories in the sidebar</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Display search results
+            let resultsHTML = '<h2 style="margin-bottom: 20px; color: #2c3e50;">Search Results</h2>';
+            
+            results.forEach(result => {
+                const highlightedContent = highlightSearchTerm(result.content, searchTerm);
+                resultsHTML += `
+                    <div class="response-card">
+                        <h3 class="response-title">${result.title}</h3>
+                        <div class="response-content">
+                            <button class="copy-button" onclick="copyToClipboard(this, '${result.id}')">Copy</button>
+                            ${highlightedContent}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contentArea.innerHTML = resultsHTML;
+        }
+        
+        function calculateRelevance(searchTerm, title, content) {
+            let score = 0;
+            const titleMatches = (title.match(new RegExp(searchTerm, 'gi')) || []).length;
+            const contentMatches = (content.match(new RegExp(searchTerm, 'gi')) || []).length;
+            
+            score += titleMatches * 10; // Title matches are worth more
+            score += contentMatches * 1;
+            
+            return score;
+        }
+        
+        function highlightSearchTerm(text, searchTerm) {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+        
+        function showWelcomeMessage() {
+            contentArea.innerHTML = `
+                <div class="welcome-message">
+                    <h2>Welcome to the ROUXops Dashboard</h2>
+                    <p>Select a category from the sidebar or use the search bar to find email responses</p>
+                </div>
+            `;
+        }
+        
+        function copyToClipboard(button, responseId) {
+            const response = responses[responseId];
+            if (!response) return;
+            
+            navigator.clipboard.writeText(response.content).then(function() {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(function() {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
